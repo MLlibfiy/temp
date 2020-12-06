@@ -90,9 +90,9 @@ public class DayMinTempStation {
         job.setOutputValueClass(NullWritable.class);
 
         //输入路径
-        FileInputFormat.addInputPath(job, new Path("/data/in/"));
+        FileInputFormat.addInputPath(job, new Path("/user/yiyu001/data/in/"));
 
-        Path outPath = new Path("/data/min_temp_station");
+        Path outPath = new Path("/user/yiyu001/data/min_temp_station");
 
         FileSystem fileSystem = FileSystem.get(configuration);
         if (fileSystem.exists(outPath)) {

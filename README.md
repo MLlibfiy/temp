@@ -7,15 +7,15 @@
 ```shell
 
 # 创建文件目录
-hadoop dfs -mkdir /data/in
+hadoop dfs -mkdir /user/yiyu001/data/in
 
 # 执行文件上传命令
 # 在200704hourly.txt文件所在的位置执行如下命令
 
-hadoop dfs -put 200704hourly.txt /data/in/
+hadoop dfs -put 200704hourly.txt /user/yiyu001/data/in/
 
 # 查看是否上传成功
-hadoop dfs -ls  /data/in/
+hadoop dfs -ls  /user/yiyu001/data/in/
 # 如果成功会打印出文件名
 
 ```
@@ -47,7 +47,7 @@ hadoop jar temp-1.0.jar com.temp.QueryTempByStation 03131
 # 查看结果
 # 03131 事气象站编号
 
-hadoop dfs -cat /data/station_temp-03131/part-r-00000
+hadoop dfs -cat /user/yiyu001/data/station_temp-03131/part-r-00000
 
 # 结果如下
 气象站,日期,最高温度,最低温度
@@ -101,7 +101,7 @@ hadoop dfs -cat /data/station_temp-03131/part-r-00000
 hadoop jar temp-1.0.jar com.temp.DayMaxTempStation
 
 # 查看结果
-hadoop dfs -cat /data/max_temp_station/part-r-00000
+hadoop dfs -cat /user/yiyu001/data/max_temp_station/part-r-00000
 
 日期,气象站,最大温度
 20070401,03144,92
@@ -155,7 +155,7 @@ hadoop dfs -cat /data/max_temp_station/part-r-00000
 hadoop jar temp-1.0.jar com.temp.DayMinTempStation
 
 # 查看结果
-hadoop dfs -cat /data/min_temp_station/part-r-00000
+hadoop dfs -cat /user/yiyu001/data/min_temp_station/part-r-00000
 
 日期,气象站,最小温度
 20070401,26412,-13
