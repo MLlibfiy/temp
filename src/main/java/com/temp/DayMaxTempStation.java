@@ -90,9 +90,9 @@ public class DayMaxTempStation {
         job.setOutputValueClass(NullWritable.class);
 
         //输入路径
-        FileInputFormat.addInputPath(job, new Path("/user/yiyu001/data/in/"));
+        FileInputFormat.addInputPath(job, new Path("/user/ylyu001/data/in/"));
 
-        Path outPath = new Path("/user/yiyu001/data/max_temp_station");
+        Path outPath = new Path("/user/ylyu001/data/max_temp_station");
 
         FileSystem fileSystem = FileSystem.get(configuration);
         if (fileSystem.exists(outPath)) {

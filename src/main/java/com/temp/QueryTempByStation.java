@@ -95,9 +95,9 @@ public class QueryTempByStation {
         job.setOutputValueClass(NullWritable.class);
 
         //输入路径
-        FileInputFormat.addInputPath(job, new Path("/user/yiyu001/data/in/"));
+        FileInputFormat.addInputPath(job, new Path("/user/ylyu001/data/in/"));
 
-        Path outPath = new Path("/user/yiyu001//data/station_temp-" + station);
+        Path outPath = new Path("/user/ylyu001//data/station_temp-" + station);
 
         //删除输出目录
         FileSystem fileSystem = FileSystem.get(configuration);
