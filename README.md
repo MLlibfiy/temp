@@ -219,4 +219,159 @@ hadoop dfs -cat /user/ylyu001/data/min_temp_station/part-r-00000
 
 ```
 
+# 2、 文本聚类
 
+## 2.1、数据准备
+
+```shell script
+
+# 将british-fiction-corpus下面的文件上传到hdfs
+# 在 （british-fiction-corpus） 所在的目录执行
+hadoop dfs -put british-fiction-corpus/* /user/ylyu001/data/docs
+
+# 查看数据
+hadoop dfs -ls /user/ylyu001/data/docs
+
+# 打印出文件列表
+
+```
+
+## 2.2、创建sequence文件
+
+```shell script
+# -i : 数据数据在hdfs的路径
+# -o : 输出文件路径
+
+mahout seqdirectory -nv -i /user/ylyu001/data/docs -o /user/ylyu001/data/docs-seqdirectory
+
+```
+
+## 2.2、创建稀疏向量
+
+```shell script
+
+# -i : 数据数据在hdfs的路径
+# -o : 输出文件路径
+mahout seq2sparse -nv -i /user/ylyu001/data/docs-seqfiles -o /user/ylyu001/data/docs-vectorsc
+
+```
+
+## 2.3、计算K-Means近似中心
+
+```shell script
+
+# -i : 数据数据在hdfs的路径
+# -o : 输出文件路径
+# -ow : 覆盖已存在的结果
+# -dm : 距离计算方法
+
+mahout canopy -i /user/ylyu001/data/docs-vectors/tfidf-vectors -ow -o /user/ylyu001/data/docs-vectors/docs-canopy-centroids -dm org.apache.mahout.common.distance.CosineDistanceMeasure -t1 1500 -t2 2000
+
+
+```
+
+
+## 2.4、运行K-Means算法, 使用余弦距离
+
+```shell script
+# -i : 数据数据在hdfs的路径
+# -o : 输出文件路径
+# -c : 近似中心
+# -dm : 距离计算方法, org.apache.mahout.common.distance.CosineDistanceMeasure(余弦距离) 
+# -cd : 收缩值
+# -x : 最大迭代次数
+# -k :  聚类数量
+
+mahout kmeans -i /user/ylyu001/data/docs-vectors/tfidf-vectors -c /user/ylyu001/data/docs-vectors/docs-canopy-centroids -o /user/ylyu001/data/docs-kmeans-clusters -dm org.apache.mahout.common.distance.CosineDistanceMeasure -cl -cd 0.1 -ow -x 20 -k 5
+
+```
+
+## 2.5、结果评估
+
+```shell script
+mahout clusterdump -dt sequencefile -d /user/ylyu001/data/docs-vectors/dictionary.file-0 -i /user/ylyu001/data/docs-kmeans-clusters/clusters-2-final -o clusters.txt -b 100 -p /user/ylyu001/data/docs-kmeans-clusters/clusteredPoints/ -n 20 -e
+
+```
+
+## 2.6、查看评估结果
+
+```shell script
+cat clusters.txt
+
+# 结果
+Inter-Cluster Density: 0.2632814546210214
+Intra-Cluster Density: 0.5713195457480179
+CDbw Inter-Cluster Density: 0.0
+CDbw Intra-Cluster Density: 1.0138723010057817
+CDbw Separation: 1.4576265920362392E7
+
+
+Inter-Cluster Density: 簇内的紧密度, 越小越好
+Intra-Cluster Density: 簇之间的离散度, 越大越好
+
+
+```
+
+
+## 2.7、对比不同k值聚类结果
+
+| 指标 | k=5 | k=10 | k=15 |
+| ---- | ---- | ---- | ---- | 
+|Inter-Cluster Density | 0.596|0.263|0.405 |
+|Intra-Cluster Density | 0.616|0.571|0.540 |
+
+> 结论：k=10的时候聚类结果最好
+
+
+## 2.8、对比不同距离计算方式
+
+### 2.8.1、cosine distance 
+
+```shell script
+
+# 运算K-Means
+# -dm org.apache.mahout.common.distance.CosineDistanceMeasure
+mahout kmeans -i /user/ylyu001/data/docs-vectors/tfidf-vectors -c /user/ylyu001/data/docs-vectors/docs-canopy-centroids -o /user/ylyu001/data/docs-kmeans-clusters -dm org.apache.mahout.common.distance.CosineDistanceMeasure -cl -cd 0.1 -ow -x 20 -k 10
+
+# 评估结果
+mahout clusterdump -dt sequencefile -d /user/ylyu001/data/docs-vectors/dictionary.file-0 -i /user/ylyu001/data/docs-kmeans-clusters/clusters-2-final -o clusters.txt -b 100 -p /user/ylyu001/data/docs-kmeans-clusters/clusteredPoints/ -n 20 -e
+
+# 查看结果
+cat clusters.txt
+
+# 结果
+Inter-Cluster Density: 0.2632814546210214
+Intra-Cluster Density: 0.5713195457480179
+CDbw Inter-Cluster Density: 0.0
+CDbw Intra-Cluster Density: 1.0138723010057817
+CDbw Separation: 1.4576265920362392E7
+
+```
+
+### 2.8.2、Chebyshev distance
+
+
+```shell script
+
+# 运算K-Means
+# -dm org.apache.mahout.common.distance.ChebyshevDistanceMeasure
+mahout kmeans -i /user/ylyu001/data/docs-vectors/tfidf-vectors -c /user/ylyu001/data/docs-vectors/docs-canopy-centroids -o /user/ylyu001/data/docs-kmeans-clusters -dm org.apache.mahout.common.distance.ChebyshevDistanceMeasure -cl -cd 0.1 -ow -x 20 -k 10
+
+# 评估结果
+mahout clusterdump -dt sequencefile -d /user/ylyu001/data/docs-vectors/dictionary.file-0 -i /user/ylyu001/data/docs-kmeans-clusters/clusters-2-final -o clusters.txt -b 100 -p /user/ylyu001/data/docs-kmeans-clusters/clusteredPoints/ -n 20 -e
+
+# 查看结果
+cat clusters.txt
+
+
+# 结果
+Inter-Cluster Density: 0.451973104522727
+Intra-Cluster Density: 0.5632747508263757
+CDbw Inter-Cluster Density: 0.0
+CDbw Intra-Cluster Density: 1.562695315896619
+CDbw Separation: 1.45710603449792E7
+
+```
+
+
+> 结论： cosine distance  距离计算方法聚类效果优于 Chebyshev distance
